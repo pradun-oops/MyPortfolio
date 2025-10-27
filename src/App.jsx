@@ -235,8 +235,8 @@ export default function Portfolio() {
           </button>
         </div>
 
-        {/* Mobile Menu (Dropdown) - STYLING FIXES APPLIED HERE */}
-        <div className={`md:hidden absolute w-full transition-all duration-300 ease-in-out origin-top-right ${isMenuOpen ? 'max-h-screen opacity-100 scale-y-100 py-4' : 'max-h-0 opacity-0 scale-y-95 overflow-hidden'}`}
+        {/* Mobile Menu (Dropdown) - ALIGNED TO THE LEFT */}
+        <div className={`md:hidden absolute w-full transition-all duration-300 ease-in-out origin-top-left ${isMenuOpen ? 'max-h-screen opacity-100 scale-y-100 py-4' : 'max-h-0 opacity-0 scale-y-95 overflow-hidden'}`}
              style={{
                  // Enhanced Glassmorphism Background
                  background: 'linear-gradient(to bottom right, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02))', 
@@ -246,13 +246,13 @@ export default function Portfolio() {
                  boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)', 
                  paddingBottom: isMenuOpen ? '1rem' : '0', 
              }}>
-          {/* Flex container to push elements to the right */}
-          <div className="flex flex-col gap-2 px-4 items-end"> {/* items-end aligns buttons to the right */}
+          {/* Flex container to push elements to the LEFT */}
+          <div className="flex flex-col gap-2 px-4 items-start"> {/* Changed items-end to items-start */}
             {navItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => scrollToSection(item.id)}
-                className={`w-11/12 text-right px-6 py-3 rounded-xl transition-all duration-300 relative group overflow-hidden 
+                className={`w-11/12 text-left px-6 py-3 rounded-xl transition-all duration-300 relative group overflow-hidden 
                             ${activeSection === item.id
                                 ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg border border-white/30'
                                 : 'text-gray-200 hover:bg-white/10 hover:text-white border border-transparent'
