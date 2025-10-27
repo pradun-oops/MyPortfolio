@@ -9,10 +9,9 @@ export default function Portfolio() {
   const [titleIndex, setTitleIndex] = useState(0);
   const [displayText, setDisplayText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // State for mobile menu
+  const [isMenuOpen, setIsMenuOpen] = useState(false); 
   const titles = ['Flutter Developer', 'Cyber Security Analyst'];
 
-  // --- Effect 1: Scroll, Active Section, and Mouse Position ---
   useEffect(() => {
     const handleScroll = () => {
       setScrollY(window.scrollY);
@@ -41,38 +40,30 @@ export default function Portfolio() {
     };
   }, []);
 
-  // --- Effect 2: Typing Animation Smoothing and Mobile Scroll Lock FIX ---
   useEffect(() => {
-    // FIX: Mobile Scroll Restriction Logic
     if (isMenuOpen) {
         document.body.style.overflow = 'hidden';
     } else {
         document.body.style.overflow = 'auto'; 
     }
 
-    // Typing animation logic
     const currentTitle = titles[titleIndex];
     let timeout;
     
-    // Smoothness parameters
     const TYPING_SPEED = 120; 
     const DELETING_SPEED = 60; 
 
-    // Dynamic speed variation
     const speed = isDeleting ? DELETING_SPEED : TYPING_SPEED;
 
     if (!isDeleting && displayText === currentTitle) {
-      // Longer pause after typing
       timeout = setTimeout(() => setIsDeleting(true), 2500); 
     } else if (isDeleting && displayText === '') {
-      // Quick pause after deletion before starting next title
       timeout = setTimeout(() => {
           setIsDeleting(false);
           setTitleIndex((prev) => (prev + 1) % titles.length); 
       }, 500);
       
     } else {
-      // Actual typing/deleting step
       timeout = setTimeout(() => {
         setDisplayText(
           isDeleting
@@ -82,24 +73,21 @@ export default function Portfolio() {
       }, speed);
     }
 
-    // Cleanup for both the typing timeout and the scroll lock
     return () => {
         clearTimeout(timeout);
         document.body.style.overflow = 'auto'; 
     };
-  }, [displayText, isDeleting, titleIndex, titles, isMenuOpen]); // Added isMenuOpen dependency for scroll lock
+  }, [displayText, isDeleting, titleIndex, titles, isMenuOpen]);
 
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
-      // Close menu and re-enable scroll after selection on mobile
       setIsMenuOpen(false); 
       document.body.style.overflow = 'auto'; 
     }
   };
 
-  // --- Data (Kept as is) ---
   const projects = [
     {
       title: "Appointment Pro",
@@ -155,7 +143,7 @@ export default function Portfolio() {
       period: "Aug 2025 - Sep 2025",
       desc: "Personal Portfolio Page using react and tailwind CSS",
       tags: ["React JS", "Tailwind CSS"],
-      repoLink: "https://github.com/pradun-oops/pixels.git"
+      repoLink: "https://github.com/pradun-oops/MyPortfolio.git"
     },
   ];
 
@@ -183,14 +171,12 @@ export default function Portfolio() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-pink-950 text-white overflow-x-hidden">
-      {/* Background Blobs (Kept as is) */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute w-[500px] h-[500px] bg-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob top-0 -left-4"></div>
         <div className="absolute w-[500px] h-[500px] bg-blue-600 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000 top-0 right-4"></div>
         <div className="absolute w-[500px] h-[500px] bg-pink-600 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000 bottom-0 left-20"></div>
       </div>
 
-      {/* --- Responsive Navigation Bar with Glass Morphism --- */}
       <nav className="fixed top-0 w-full z-50 transition-all duration-300" style={{
         background: scrollY > 50 || isMenuOpen ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
         backdropFilter: scrollY > 50 || isMenuOpen ? 'blur(20px)' : 'none',
@@ -202,7 +188,6 @@ export default function Portfolio() {
             PK
           </div>
           
-          {/* Desktop Navigation (Visible on md and up) */}
           <div className="hidden md:flex gap-2">
             <div className="flex gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide"> 
               {navItems.map((item) => (
@@ -227,7 +212,6 @@ export default function Portfolio() {
             </div>
           </div>
 
-          {/* Mobile Menu Button (Visible on small screens) */}
           <button 
             className="md:hidden p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all"
             onClick={() => setIsMenuOpen(!isMenuOpen)}>
@@ -235,10 +219,8 @@ export default function Portfolio() {
           </button>
         </div>
 
-        {/* Mobile Menu (Dropdown) - ALIGNED TO THE LEFT */}
         <div className={`md:hidden absolute w-full transition-all duration-300 ease-in-out origin-top-left ${isMenuOpen ? 'max-h-screen opacity-100 scale-y-100 py-4' : 'max-h-0 opacity-0 scale-y-95 overflow-hidden'}`}
              style={{
-                 // Enhanced Glassmorphism Background
                  background: 'linear-gradient(to bottom right, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02))', 
                  backdropFilter: 'blur(30px) brightness(80%)', 
                  border: '1px solid rgba(255, 255, 255, 0.15)', 
@@ -246,8 +228,7 @@ export default function Portfolio() {
                  boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)', 
                  paddingBottom: isMenuOpen ? '1rem' : '0', 
              }}>
-          {/* Flex container to push elements to the LEFT */}
-          <div className="flex flex-col gap-2 px-4 items-start"> {/* Changed items-end to items-start */}
+          <div className="flex flex-col gap-2 px-4 items-start"> 
             {navItems.map((item) => (
               <button
                 key={item.id}
@@ -259,7 +240,6 @@ export default function Portfolio() {
                             }`}
               >
                 <span className="relative z-10">{item.name}</span>
-                {/* Visual effect for active item */}
                 {activeSection === item.id && (
                     <div className="absolute inset-0 bg-white/10 animate-pulse rounded-xl"></div>
                 )}
@@ -269,9 +249,7 @@ export default function Portfolio() {
         </div>
       </nav>
 
-      {/* --- Main Content Container (Apply blur when menu is open) --- */}
       <main className={`transition-filter duration-300 ${isMenuOpen ? 'filter blur-sm md:blur-none' : ''}`}>
-        {/* --- Home Section --- */}
         <section id="home" className="min-h-screen flex flex-col items-center justify-center relative px-4 sm:px-6 pt-28 pb-12">
           <div className="text-center z-10 max-w-4xl w-full flex flex-col items-center">
             <div className="mb-8 flex justify-center animate-fade-in">
@@ -291,7 +269,6 @@ export default function Portfolio() {
               <h1 className="text-5xl sm:text-6xl md:text-8xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-purple-300 via-pink-300 to-blue-300 bg-clip-text text-transparent drop-shadow-2xl">
                 Pradun Kumar
               </h1>
-              {/* FIX: Reduced font size and added whitespace-nowrap to prevent wrapping/overlap */}
               <div className="h-8 sm:h-10 mb-4 sm:mb-6 flex items-center justify-center">
                 <p className="text-lg sm:text-xl md:text-2xl font-semibold text-white drop-shadow-lg whitespace-nowrap"> 
                   <span className="inline-block text-center">
@@ -300,7 +277,6 @@ export default function Portfolio() {
                   </span>
                 </p>
               </div>
-              {/* FIX: Increased max-w for better description wrapping */}
               <p className="text-sm sm:text-base md:text-lg text-gray-200 max-w-sm mx-auto mb-6 sm:mb-8 drop-shadow-md font-medium leading-normal mt-4"> 
                 Dynamic cross-platform developer driving mobile applications with focus on user engagement,
                 data privacy, and machine learning optimization
@@ -323,7 +299,6 @@ export default function Portfolio() {
           </div>
         </section>
 
-        {/* --- About Section (Content Kept as is) --- */}
         <section id="about" className="min-h-screen flex items-center py-16 sm:py-20 px-4 sm:px-6">
           <div className="max-w-6xl mx-auto w-full">
             <h2 className="text-4xl sm:text-5xl font-bold mb-8 sm:mb-12 text-center bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
@@ -427,7 +402,6 @@ export default function Portfolio() {
           </div>
         </section>
 
-        {/* --- Projects Section (Content Kept as is) --- */}
         <section id="projects" className="min-h-screen py-16 sm:py-20 px-4 sm:px-6">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-4xl sm:text-5xl font-bold mb-8 sm:mb-12 text-center bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
@@ -490,7 +464,6 @@ export default function Portfolio() {
           </div>
         </section>
 
-        {/* --- Skills Section (Content Kept as is) --- */}
         <section id="skills" className="min-h-screen py-16 sm:py-20 px-4 sm:px-6">
           <div className="max-w-6xl mx-auto w-full">
             <h2 className="text-4xl sm:text-5xl font-bold mb-8 sm:mb-12 text-center bg-gradient-to-r from-green-400 to-cyan-400 bg-clip-text text-transparent">
@@ -561,7 +534,6 @@ export default function Portfolio() {
           </div>
         </section>
 
-        {/* --- Contact Section (Content Kept as is) --- */}
         <section id="contact" className="min-h-screen flex items-center py-16 sm:py-20 px-4 sm:px-6">
           <div className="max-w-4xl mx-auto w-full text-center">
             <h2 className="text-4xl sm:text-5xl font-bold mb-6 sm:mb-8 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
@@ -612,7 +584,6 @@ export default function Portfolio() {
         </section>
       </main>
 
-      {/* --- Footer (Kept as is - it's fine) --- */}
       <footer className="py-6 sm:py-8 px-4 sm:px-6 border-t border-white/10 bg-black/20 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto text-center">
           <p className="text-gray-400 text-sm">
@@ -636,7 +607,6 @@ export default function Portfolio() {
       </footer>
 
       <style>{`
-        /* Styles remain the same, ensuring animations and responsiveness are intact */
         @keyframes blob {
           0%, 100% { transform: translate(0, 0) scale(1); }
           33% { transform: translate(30px, -50px) scale(1.1); }
@@ -689,13 +659,12 @@ export default function Portfolio() {
         .animate-blink {
           animation: blink 1s step-end infinite;
         }
-        /* Custom scrollbar hide for horizontal nav on desktop if needed */
         .scrollbar-hide::-webkit-scrollbar {
           display: none;
         }
         .scrollbar-hide {
-          -ms-overflow-style: none;  /* IE and Edge */
-          scrollbar-width: none;  /* Firefox */
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
       `}</style>
     </div>
