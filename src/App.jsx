@@ -12,6 +12,7 @@ export default function Portfolio() {
   const [isMenuOpen, setIsMenuOpen] = useState(false); // State for mobile menu
   const titles = ['Flutter Developer', 'Cyber Security Analyst'];
 
+  // --- Effect 1: Scroll, Active Section, and Mouse Position ---
   useEffect(() => {
     const handleScroll = () => {
       setScrollY(window.scrollY);
@@ -40,29 +41,38 @@ export default function Portfolio() {
     };
   }, []);
 
-  // Title Typing Effect Logic (Kept as is - it's fine)
+  // --- Effect 2: Typing Animation Smoothing and Mobile Scroll Lock FIX ---
   useEffect(() => {
-    // This interval was causing a conflict with the typing effect's natural index progression.
-    // Commenting it out to let the typing logic fully control the title cycling.
-    /*
-    const interval = setInterval(() => {
-      setTitleIndex((prev) => (prev + 1) % titles.length);
-    }, 3000);
-    return () => clearInterval(interval);
-    */
-  }, []); // Empty dependency array means this runs once on mount
+    // FIX: Mobile Scroll Restriction Logic
+    if (isMenuOpen) {
+        document.body.style.overflow = 'hidden';
+    } else {
+        document.body.style.overflow = 'auto'; 
+    }
 
-  useEffect(() => {
+    // Typing animation logic
     const currentTitle = titles[titleIndex];
     let timeout;
+    
+    // Smoothness parameters
+    const TYPING_SPEED = 120; 
+    const DELETING_SPEED = 60; 
+
+    // Dynamic speed variation
+    const speed = isDeleting ? DELETING_SPEED : TYPING_SPEED;
 
     if (!isDeleting && displayText === currentTitle) {
-      timeout = setTimeout(() => setIsDeleting(true), 2000); // Pause at end of typing
+      // Longer pause after typing
+      timeout = setTimeout(() => setIsDeleting(true), 2500); 
     } else if (isDeleting && displayText === '') {
-      setIsDeleting(false);
-      setTitleIndex((prev) => (prev + 1) % titles.length); // Move to next title
+      // Quick pause after deletion before starting next title
+      timeout = setTimeout(() => {
+          setIsDeleting(false);
+          setTitleIndex((prev) => (prev + 1) % titles.length); 
+      }, 500);
+      
     } else {
-      const speed = isDeleting ? 50 : 100; // Typing/deleting speed
+      // Actual typing/deleting step
       timeout = setTimeout(() => {
         setDisplayText(
           isDeleting
@@ -72,14 +82,20 @@ export default function Portfolio() {
       }, speed);
     }
 
-    return () => clearTimeout(timeout);
-  }, [displayText, isDeleting, titleIndex, titles]); // Added titles to dependency array
+    // Cleanup for both the typing timeout and the scroll lock
+    return () => {
+        clearTimeout(timeout);
+        document.body.style.overflow = 'auto'; 
+    };
+  }, [displayText, isDeleting, titleIndex, titles, isMenuOpen]); // Added isMenuOpen dependency for scroll lock
 
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
-      setIsMenuOpen(false); // Close menu after selection on mobile
+      // Close menu and re-enable scroll after selection on mobile
+      setIsMenuOpen(false); 
+      document.body.style.overflow = 'auto'; 
     }
   };
 
@@ -174,11 +190,11 @@ export default function Portfolio() {
         <div className="absolute w-[500px] h-[500px] bg-pink-600 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000 bottom-0 left-20"></div>
       </div>
 
-      {/* --- Responsive Navigation Bar --- */}
+      {/* --- Responsive Navigation Bar with Glass Morphism --- */}
       <nav className="fixed top-0 w-full z-50 transition-all duration-300" style={{
-        background: scrollY > 50 || isMenuOpen ? 'rgba(15, 23, 42, 0.9)' : 'transparent',
+        background: scrollY > 50 || isMenuOpen ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
         backdropFilter: scrollY > 50 || isMenuOpen ? 'blur(20px)' : 'none',
-        borderBottom: scrollY > 50 || isMenuOpen ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
+        borderBottom: scrollY > 50 || isMenuOpen ? '1px solid rgba(255, 255, 255, 0.2)' : 'none'
       }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
           <div className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent cursor-pointer"
@@ -187,20 +203,19 @@ export default function Portfolio() {
           </div>
           
           {/* Desktop Navigation (Visible on md and up) */}
-          <div className="hidden md:flex gap-2"> {/* Elements moved to the right by using justify-between on parent and keeping this div without 'ml-auto' */}
-            {/* Horizontal Scroll for Desktop (Optional, but useful if many items) */}
+          <div className="hidden md:flex gap-2">
             <div className="flex gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide"> 
               {navItems.map((item) => (
                 <button
                   key={item.id}
                   onClick={() => scrollToSection(item.id)}
                   className={`px-4 py-2 rounded-xl transition-all duration-300 relative overflow-hidden group ${activeSection === item.id
-                    ? 'bg-white/10 text-white shadow-lg'
-                    : 'text-gray-200 hover:text-white'
+                    ? 'bg-white/30 text-white shadow-lg'
+                    : 'text-gray-200 hover:text-white hover:bg-white/10'
                     }`}
                   style={{
                     backdropFilter: 'blur(10px)',
-                    border: activeSection === item.id ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid transparent'
+                    border: activeSection === item.id ? '1px solid rgba(255, 255, 255, 0.5)' : '1px solid transparent'
                   }}>
                   <span className="relative z-10">{item.name}</span>
                   <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -213,7 +228,6 @@ export default function Portfolio() {
           </div>
 
           {/* Mobile Menu Button (Visible on small screens) */}
-          {/* Button moved to the right by default with justify-between on parent */}
           <button 
             className="md:hidden p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all"
             onClick={() => setIsMenuOpen(!isMenuOpen)}>
@@ -221,18 +235,34 @@ export default function Portfolio() {
           </button>
         </div>
 
-        {/* Mobile Menu (Dropdown) */}
-        <div className={`md:hidden absolute w-full transition-all duration-300 ease-in-out ${isMenuOpen ? 'max-h-96 opacity-100 py-4' : 'max-h-0 opacity-0 overflow-hidden'}`}>
-          <div className="flex flex-col gap-2 px-4">
+        {/* Mobile Menu (Dropdown) - STYLING FIXES APPLIED HERE */}
+        <div className={`md:hidden absolute w-full transition-all duration-300 ease-in-out origin-top-right ${isMenuOpen ? 'max-h-screen opacity-100 scale-y-100 py-4' : 'max-h-0 opacity-0 scale-y-95 overflow-hidden'}`}
+             style={{
+                 // Enhanced Glassmorphism Background
+                 background: 'linear-gradient(to bottom right, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02))', 
+                 backdropFilter: 'blur(30px) brightness(80%)', 
+                 border: '1px solid rgba(255, 255, 255, 0.15)', 
+                 borderRadius: '0 0 1.5rem 1.5rem', 
+                 boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)', 
+                 paddingBottom: isMenuOpen ? '1rem' : '0', 
+             }}>
+          {/* Flex container to push elements to the right */}
+          <div className="flex flex-col gap-2 px-4 items-end"> {/* items-end aligns buttons to the right */}
             {navItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => scrollToSection(item.id)}
-                className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-300 ${activeSection === item.id
-                  ? 'bg-purple-500 text-white shadow-lg'
-                  : 'text-gray-200 hover:bg-white/10 hover:text-white'
-                  }`}>
-                {item.name}
+                className={`w-11/12 text-right px-6 py-3 rounded-xl transition-all duration-300 relative group overflow-hidden 
+                            ${activeSection === item.id
+                                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg border border-white/30'
+                                : 'text-gray-200 hover:bg-white/10 hover:text-white border border-transparent'
+                            }`}
+              >
+                <span className="relative z-10">{item.name}</span>
+                {/* Visual effect for active item */}
+                {activeSection === item.id && (
+                    <div className="absolute inset-0 bg-white/10 animate-pulse rounded-xl"></div>
+                )}
               </button>
             ))}
           </div>
@@ -243,7 +273,7 @@ export default function Portfolio() {
       <main className={`transition-filter duration-300 ${isMenuOpen ? 'filter blur-sm md:blur-none' : ''}`}>
         {/* --- Home Section --- */}
         <section id="home" className="min-h-screen flex flex-col items-center justify-center relative px-4 sm:px-6 pt-28 pb-12">
-          <div className="text-center z-10 max-w-4xl w-full flex flex-col items-center"> {/* Added flex-col items-center for better stacking on mobile */}
+          <div className="text-center z-10 max-w-4xl w-full flex flex-col items-center">
             <div className="mb-8 flex justify-center animate-fade-in">
               <div className="relative group">
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 rounded-full blur-2xl opacity-50 group-hover:opacity-75 transition-opacity duration-300 animate-pulse"></div>
@@ -257,19 +287,21 @@ export default function Portfolio() {
               </div>
             </div>
 
-            <div className="animate-fade-in px-4"> {/* Added px-4 here to prevent text from touching screen edges on small devices */}
+            <div className="animate-fade-in px-2 sm:px-4"> 
               <h1 className="text-5xl sm:text-6xl md:text-8xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-purple-300 via-pink-300 to-blue-300 bg-clip-text text-transparent drop-shadow-2xl">
                 Pradun Kumar
               </h1>
-              <div className="h-10 sm:h-12 mb-4 sm:mb-6 flex items-center justify-center">
-                <p className="text-xl sm:text-2xl md:text-3xl font-semibold text-white drop-shadow-lg">
-                  <span className="inline-block min-w-[250px] sm:min-w-[300px] text-center">
+              {/* FIX: Reduced font size and added whitespace-nowrap to prevent wrapping/overlap */}
+              <div className="h-8 sm:h-10 mb-4 sm:mb-6 flex items-center justify-center">
+                <p className="text-lg sm:text-xl md:text-2xl font-semibold text-white drop-shadow-lg whitespace-nowrap"> 
+                  <span className="inline-block text-center">
                     {displayText}
                     <span className="animate-blink ml-1">|</span>
                   </span>
                 </p>
               </div>
-              <p className="text-base sm:text-lg text-gray-200 max-w-2xl mx-auto mb-6 sm:mb-8 drop-shadow-md font-medium leading-relaxed"> {/* Added leading-relaxed for better line spacing */}
+              {/* FIX: Increased max-w for better description wrapping */}
+              <p className="text-sm sm:text-base md:text-lg text-gray-200 max-w-sm mx-auto mb-6 sm:mb-8 drop-shadow-md font-medium leading-normal mt-4"> 
                 Dynamic cross-platform developer driving mobile applications with focus on user engagement,
                 data privacy, and machine learning optimization
               </p>
@@ -291,7 +323,7 @@ export default function Portfolio() {
           </div>
         </section>
 
-        {/* --- About Section --- */}
+        {/* --- About Section (Content Kept as is) --- */}
         <section id="about" className="min-h-screen flex items-center py-16 sm:py-20 px-4 sm:px-6">
           <div className="max-w-6xl mx-auto w-full">
             <h2 className="text-4xl sm:text-5xl font-bold mb-8 sm:mb-12 text-center bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
@@ -395,7 +427,7 @@ export default function Portfolio() {
           </div>
         </section>
 
-        {/* --- Projects Section --- */}
+        {/* --- Projects Section (Content Kept as is) --- */}
         <section id="projects" className="min-h-screen py-16 sm:py-20 px-4 sm:px-6">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-4xl sm:text-5xl font-bold mb-8 sm:mb-12 text-center bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
@@ -458,13 +490,12 @@ export default function Portfolio() {
           </div>
         </section>
 
-        {/* --- Skills Section --- */}
+        {/* --- Skills Section (Content Kept as is) --- */}
         <section id="skills" className="min-h-screen py-16 sm:py-20 px-4 sm:px-6">
           <div className="max-w-6xl mx-auto w-full">
             <h2 className="text-4xl sm:text-5xl font-bold mb-8 sm:mb-12 text-center bg-gradient-to-r from-green-400 to-cyan-400 bg-clip-text text-transparent">
               Skills & Technologies
             </h2>
-            {/* Removed the extra "React JS" and "Tailwind CSS" tags that were present in Image 3 */}
             <div className="flex flex-wrap justify-center gap-4">
               {skills.map((skill, idx) => {
                   const IconComponent = skill.icon;
@@ -530,7 +561,7 @@ export default function Portfolio() {
           </div>
         </section>
 
-        {/* --- Contact Section --- */}
+        {/* --- Contact Section (Content Kept as is) --- */}
         <section id="contact" className="min-h-screen flex items-center py-16 sm:py-20 px-4 sm:px-6">
           <div className="max-w-4xl mx-auto w-full text-center">
             <h2 className="text-4xl sm:text-5xl font-bold mb-6 sm:mb-8 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
@@ -579,7 +610,7 @@ export default function Portfolio() {
             </div>
           </div>
         </section>
-      </main> {/* End of main content container */}
+      </main>
 
       {/* --- Footer (Kept as is - it's fine) --- */}
       <footer className="py-6 sm:py-8 px-4 sm:px-6 border-t border-white/10 bg-black/20 backdrop-blur-xl">
@@ -605,7 +636,7 @@ export default function Portfolio() {
       </footer>
 
       <style>{`
-        /* Global Styles for responsiveness/animations */
+        /* Styles remain the same, ensuring animations and responsiveness are intact */
         @keyframes blob {
           0%, 100% { transform: translate(0, 0) scale(1); }
           33% { transform: translate(30px, -50px) scale(1.1); }
